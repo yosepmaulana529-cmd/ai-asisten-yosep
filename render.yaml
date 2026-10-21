@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: hermes-yosep-web
+    runtime: python
+    rootDir: hermes-web
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: SECRET_KEY
+        generateValue: true
+      - key: HERMES_BASE_URL
+        sync: false
+      - key: HERMES_API_KEY
+        sync: false
+      - key: OWNER_EMAIL
+        sync: false
+      - key: DAILY_MESSAGE_LIMIT
+        value: "50"
