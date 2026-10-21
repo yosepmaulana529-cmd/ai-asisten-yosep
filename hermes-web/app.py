@@ -10,8 +10,9 @@ ROOT=Path(__file__).parent
 DB=os.getenv("DATABASE_PATH",str(ROOT/"data.sqlite3"))
 SECRET=os.getenv("SECRET_KEY","")
 OWNER=os.getenv("OWNER_EMAIL","").strip().lower()
-HERMES=os.getenv("HERMES_BASE_URL","").rstrip("/")
-HERMES_KEY=os.getenv("HERMES_API_KEY","")
+AI_BASE_URL=os.getenv("AI_BASE_URL","https://openrouter.ai/api").rstrip("/")
+AI_API_KEY=os.getenv("AI_API_KEY","")
+AI_MODEL=os.getenv("AI_MODEL","openrouter/free")
 LIMIT=max(1,int(os.getenv("DAILY_MESSAGE_LIMIT","50")))
 app=FastAPI(title="Hermes AI Yosep",docs_url=None,redoc_url=None)
 
@@ -47,7 +48,7 @@ class Message(BaseModel):
     chat_id:str|None=None
 
 @app.get("/api/health")
-def health(): return {"ok":True,"hermes_configured":bool(HERMES and HERMES_KEY)}
+def health(): return {"ok":True,"ai_configured":bool(AI_BASE_URL and AI_API_KEY and AI_MODEL)}
 @app.get("/",response_class=HTMLResponse)
 def home(): return (ROOT/"index.html").read_text(encoding="utf-8")
 @app.post("/api/register")
@@ -94,7 +95,7 @@ def stats(u=Depends(user)):
     return {"users":users,"chats":chats,"messages_today":msgs,"daily_limit":LIMIT}
 @app.post("/api/chat")
 async def chat(a:Message,u=Depends(user)):
-    if not HERMES or not HERMES_KEY: raise HTTPException(503,"Hermes belum terhubung. Admin perlu mengatur HERMES_BASE_URL dan HERMES_API_KEY.")
+    if not AI_BASE_URL or not AI_API_KEY or not AI_MODEL: raise HTTPException(503,"AI belum terhubung. Admin perlu mengatur AI_BASE_URL, AI_API_KEY, dan AI_MODEL.")
     today=datetime.now(timezone.utc).date().isoformat()
     with connect() as c:
         used=c.execute("SELECT n FROM usage WHERE uid=? AND day=?",(u["id"],today)).fetchone()
@@ -111,13 +112,13 @@ async def chat(a:Message,u=Depends(user)):
     session=hashlib.sha256(f"{u['id']}:{cid}".encode()).hexdigest()
     try:
         async with httpx.AsyncClient(timeout=180) as client:
-            r=await client.post(HERMES+"/v1/chat/completions",headers={"Authorization":"Bearer "+HERMES_KEY,"X-Hermes-Session-Key":session},json={"model":"hermes-agent","messages":msgs,"stream":False})
-        if r.status_code>=400: raise HTTPException(502,f"Server Hermes error {r.status_code}. Periksa model dan provider.")
+            r=await client.post(AI_BASE_URL+"/v1/chat/completions",headers={"Authorization":"Bearer "+AI_API_KEY,"HTTP-Referer":"https://hermes-yosep.onrender.com","X-Title":"Hermes AI Yosep","X-Hermes-Session-Key":session},json={"model":AI_MODEL,"messages":msgs,"stream":False})
+        if r.status_code>=400: raise HTTPException(502,f"Server AI error {r.status_code}. Periksa model, API key, dan provider.")
         answer=r.json()["choices"][0]["message"]["content"]
         if not isinstance(answer,str) or not answer.strip(): raise ValueError()
     except HTTPException: raise
-    except httpx.TimeoutException: raise HTTPException(504,"Hermes terlalu lama merespons.")
-    except Exception: raise HTTPException(502,"Tidak bisa menghubungi Hermes atau format jawaban tidak valid.")
+    except httpx.TimeoutException: raise HTTPException(504,"Layanan AI terlalu lama merespons.")
+    except Exception: raise HTTPException(502,"Tidak bisa menghubungi layanan AI atau format jawaban tidak valid.")
     msgs.append({"role":"assistant","content":answer})
     with connect() as c: c.execute("UPDATE chats SET messages=?,updated=? WHERE id=? AND uid=?",(json.dumps(msgs,ensure_ascii=False),datetime.now(timezone.utc).isoformat(),cid,u["id"]))
     return {"chat_id":cid,"answer":answer,"used_today":(used["n"] if used else 0)+1,"daily_limit":LIMIT}
