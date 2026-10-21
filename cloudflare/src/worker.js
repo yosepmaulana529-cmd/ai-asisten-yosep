@@ -1,12 +1,11 @@
 const encoder = new TextEncoder();
 const COOKIE = "yosep_session";
-const DAY = 86400;
 const json = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), {
   status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...headers }
 });
 const fail = (message, status = 400) => json({ detail: message }, status);
 const b64 = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
-const unb64 = (s) => Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((s.length+3)%4)), c=>c.charCodeAt(0));
+const unb64 = (s) => { const raw=s.replace(/-/g,"+").replace(/_/g,"/"); return Uint8Array.from(atob(raw+"=".repeat((4-raw.length%4)%4)), c=>c.charCodeAt(0)); };
 async function digestPassword(password, salt) {
   const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
   return b64(await crypto.subtle.deriveBits({name:"PBKDF2", salt:unb64(salt), iterations:210000, hash:"SHA-256"}, key, 256));
