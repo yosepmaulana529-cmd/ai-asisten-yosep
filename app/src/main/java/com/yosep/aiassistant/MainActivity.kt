@@ -18,7 +18,6 @@ import androidx.core.content.ContextCompat
 class MainActivity : Activity() {
     private lateinit var webView: WebView
     private var pendingRequest: PermissionRequest? = null
-    private val appUrl = "https://ais-dev-4pw5c6nhl4o2j5hn4xs7f4-138243459135.asia-east1.run.app/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,12 +26,20 @@ class MainActivity : Activity() {
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.mediaPlaybackRequiresUserGesture = false
+        webView.settings.allowFileAccess = true
+        webView.settings.allowContentAccess = true
+
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                val url = request.url
-                if (url.host == Uri.parse(appUrl).host) return false
-                startActivity(Intent(Intent.ACTION_VIEW, url))
-                return true
+                val uri = request.url
+                if (uri.scheme == "file" || uri.scheme == "about") return false
+                return try {
+                    startActivity(Intent(Intent.ACTION_VIEW, uri))
+                    true
+                } catch (_: Exception) {
+                    Toast.makeText(this@MainActivity, "Tidak bisa membuka tautan ini.", Toast.LENGTH_SHORT).show()
+                    true
+                }
             }
         }
         webView.webChromeClient = object : WebChromeClient() {
@@ -47,14 +54,16 @@ class MainActivity : Activity() {
                 }
             }
         }
-        webView.loadUrl(appUrl)
+        // Load the actual app shipped inside the APK, not an unrelated/stale hosted webpage.
+        webView.loadUrl("file:///android_asset/index.html")
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 44) {
             val request = pendingRequest
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) request?.grant(request?.resources ?: emptyArray()) else {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) request?.grant(request?.resources ?: emptyArray())
+            else {
                 request?.deny()
                 Toast.makeText(this, "Izin mikrofon diperlukan untuk fitur suara.", Toast.LENGTH_LONG).show()
             }
