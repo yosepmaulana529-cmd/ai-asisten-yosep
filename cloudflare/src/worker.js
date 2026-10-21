@@ -32,12 +32,13 @@ const cookieHeader = (token, maxAge=1209600) => COOKIE+"="+token+"; Path=/; Http
 const dayKey = () => new Date().toISOString().slice(0,10);
 async function handle(request, env) {
   const url = new URL(request.url), path = url.pathname;
-  if (path === "/api/health" && request.method === "GET") return json({ok:true,ai_configured:!!env.AI,storage:"D1"});
+  if (path === "/api/health" && request.method === "GET") { let dbReady=false; try { await env.DB.prepare("SELECT 1 AS ok").first(); dbReady=true; } catch {} return json({ok:true,ai_configured:!!env.AI,database_ready:dbReady,session_secret_ready:!!env.SESSION_SECRET && env.SESSION_SECRET.length>=32,owner_email_configured:!!env.OWNER_EMAIL}); }
   if (path === "/api/register" && request.method === "POST") {
     let a; try {a=await request.json()} catch{return fail("JSON tidak valid")}
     const email=String(a.email||"").trim().toLowerCase(), password=String(a.password||"");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length<10 || password.length>200) return fail("Email tidak valid atau kata sandi harus 10–200 karakter.");
     if (!env.SESSION_SECRET || env.SESSION_SECRET.length<32) return fail("Server belum dikonfigurasi.",503);
+    let dbReady; try { dbReady=!!env.DB; await env.DB.prepare("SELECT 1").first(); } catch { return fail("Database akun belum terhubung atau tabel belum dibuat. Periksa binding D1 dan jalankan migrasi.",503); }
     const salt=b64(crypto.getRandomValues(new Uint8Array(16))), hash=await digestPassword(password,salt), id=crypto.randomUUID();
     const role=env.OWNER_EMAIL && email===env.OWNER_EMAIL.toLowerCase() ? "admin" : "user";
     try { await env.DB.prepare("INSERT INTO users(id,email,password_hash,salt,role,created_at) VALUES(?,?,?,?,?,?)").bind(id,email,hash,salt,role,new Date().toISOString()).run(); }
@@ -47,7 +48,8 @@ async function handle(request, env) {
   if (path === "/api/login" && request.method === "POST") {
     let a; try {a=await request.json()} catch{return fail("JSON tidak valid")}
     const email=String(a.email||"").trim().toLowerCase(), password=String(a.password||"");
-    const u=await env.DB.prepare("SELECT * FROM users WHERE email=?").bind(email).first();
+    if (!env.SESSION_SECRET || env.SESSION_SECRET.length<32) return fail("Server belum dikonfigurasi: SESSION_SECRET belum disetel.",503);
+    let u; try { u=await env.DB.prepare("SELECT * FROM users WHERE email=?").bind(email).first(); } catch { return fail("Database akun belum siap. Periksa binding D1 dan migrasi tabel users.",503); }
     if (!u || await digestPassword(password,u.salt) !== u.password_hash) return fail("Email atau kata sandi salah.",401);
     return json({ok:true,email:u.email,role:u.role},200,{"set-cookie":await sessionToken(u.id,env).then(t=>cookieHeader(t))});
   }
