@@ -180,4 +180,19 @@ try{const prev=JSON.parse(localStorage.getItem('ay_sw_last')||'null');if(prev){$
 
 $('form').onsubmit=e=>{e.preventDefault();const t=$('prompt').value.trim();if(!t)return;$('prompt').value='';add(t,'user');askAI(t)};
 setOnline(online);
+
+// Autopilot lokal: saat aplikasi dibuka, siapkan paket kerja sekali per hari.
+// Tidak menjalankan API online otomatis dan tidak melakukan tindakan eksternal.
+setOnline(online);
+try {
+ const today = new Date().toLocaleDateString('sv-SE');
+ const lastAutoRun = localStorage.getItem('ay_auto_mission_date');
+ if (!online && lastAutoRun !== today) {
+  localStorage.setItem('ay_auto_mission_date', today);
+  $('status').textContent = 'Status: menyiapkan paket kerja harian otomatis (offline)';
+  $('runMission').click();
+ }
+} catch(e) {
+ // Tetap dapat dipakai manual bila penyimpanan perangkat tidak tersedia.
+}
 </script></body></html>
