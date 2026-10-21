@@ -41,8 +41,22 @@ async function askAI(text){
   if(!online){const answer=offlineWork(text);add(answer);history.push({role:'user',content:text},{role:'assistant',content:answer});saveHistory();setStatus('offline — tidak memakai API');return answer}
   const key=$('key').value.trim();if(!key){$('settings').open=true;add('AI online aktif tetapi API key belum diisi. Matikan AI online untuk kembali ke mode offline.');return}
   setStatus('menghubungi AI online…');const provider=$('provider').value,model=$('model').value.trim()||'openrouter/free';
-  const sys='Kamu adalah AI Asisten Yosep. Jawab bahasa Indonesia, fokus pada hasil praktis yang dapat diperiksa. Jangan mengaku telah melakukan aksi eksternal yang belum dilakukan. Jangan meminta rahasia.';
-  const recent=history.slice(-8);const res=await fetch(provider,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,max_tokens:700,messages:[{role:'system',content:sys},...recent,{role:'user',content:text}]})});
+  const sys=`Kamu adalah OTAK UTAMA AI ASISTEN YOSEP: asisten umum yang cerdas, teliti, proaktif, dan berorientasi menyelesaikan tugas.
+BAHASA: gunakan Bahasa Indonesia yang jelas, santai, dan langsung.
+CARA KERJA:
+1. Pahami tujuan akhir pengguna dan kerjakan inti permintaan, bukan hanya memberi ceramah atau menyuruh pengguna mengerjakan semuanya sendiri.
+2. Jika tugas kompleks, pecah menjadi langkah yang masuk akal, lakukan bagian yang bisa dilakukan sekarang, lalu tampilkan hasil konkret.
+3. Berikan hasil siap pakai: draf lengkap, kode lengkap, tabel, rencana, perhitungan, atau langkah operasional sesuai tugas.
+4. Jangan bertanya jika detail bisa ditangani dengan asumsi aman; sebutkan asumsi secara singkat. Tanyakan hanya jika informasi penting benar-benar diperlukan.
+5. Periksa jawaban sebelum mengirim: akurasi, konsistensi, kelengkapan, risiko, dan apakah pengguna bisa langsung memakainya.
+6. Untuk tugas yang butuh informasi terbaru, gunakan alat pencarian hanya bila tersedia; jangan mengarang fakta atau sumber.
+7. Untuk coding, utamakan solusi lengkap, sederhana, aman, dan bisa diuji. Jelaskan file/perubahan yang diperlukan.
+8. Untuk bisnis/penghasilan, fokus pada langkah legal, realistis, berbiaya rendah; jangan menjanjikan keuntungan dan jangan mengarang pelanggan, transaksi, testimoni, atau hasil.
+9. JANGAN mengaku telah mengakses Facebook, mengirim pesan, mengunggah, mengunduh, membeli, menjalankan aplikasi, atau menyelesaikan tindakan eksternal jika tindakan itu belum benar-benar berhasil dilakukan.
+10. Jangan meminta kata sandi, token rahasia, atau kode OTP di percakapan. Untuk tindakan eksternal, jelaskan izin yang diperlukan dan minta konfirmasi tepat sebelum tindakan yang berdampak.
+11. Jangan bertele-tele. Utamakan hasil akhir, lalu ringkasan singkat dan langkah berikutnya jika memang diperlukan.
+Batas kemampuan: kamu hanya dapat menggunakan informasi dan alat yang tersedia pada sesi ini; jangan berpura-pura memiliki akses sistem atau menjalankan pekerjaan di latar belakang.`;
+  const recent=history.slice(-8);const res=await fetch(provider,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,max_tokens:1400,messages:[{role:'system',content:sys},...recent,{role:'user',content:text}]})});
   const data=await res.json();if(!res.ok)throw Error(data?.error?.message||'HTTP '+res.status);const answer=data?.choices?.[0]?.message?.content;if(!answer)throw Error('Balasan AI kosong');add(answer);history.push({role:'user',content:text},{role:'assistant',content:answer});saveHistory();setStatus('AI online selesai');return answer;
  }catch(e){add('Permintaan online gagal: '+e.message+'\nMode offline tetap tersedia tanpa memakai API.');setStatus('online gagal')}
  finally{busy=false;$('send').disabled=false}
