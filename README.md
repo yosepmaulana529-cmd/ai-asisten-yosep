@@ -21,3 +21,8 @@ Portal baru ada di folder [hermes-web](hermes-web/README.md). Kode portal sudah 
 **Status penting:** file portal dan konfigurasi deploy sudah masuk repository, tetapi portal belum otomatis live dan belum bisa menjawab sampai di-deploy ke akun hosting dan dihubungkan ke server Hermes Agent yang aktif. Hosting/model dapat memiliki batas atau biaya. Database SQLite pada hosting sementara tidak cocok untuk layanan produksi karena penyimpanan dapat hilang saat redeploy; sebelum dibuka untuk banyak pengguna, pasang database persisten, verifikasi email, pemulihan kata sandi, dan kebijakan privasi.
 
 Dokumentasi resmi Hermes: https://hermes-agent.nousresearch.com/docs/ — API server: https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server/
+
+
+## Deploy portal web
+
+Gunakan [Deploy to Render](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2Fyosepmaulana529-cmd%2Fai-asisten-yosep) untuk membuka proses deployment dari blueprint `render.yaml`. Deployment ini hanya menyalakan portal; agar AI menjawab, environment `HERMES_BASE_URL` dan `HERMES_API_KEY` harus menunjuk ke Hermes Agent yang sudah berjalan. Jangan masukkan rahasia ke repository atau ke chat.
