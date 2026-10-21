@@ -6,6 +6,7 @@
 <header class="top"><div class="brand">✨ AI Asisten Yosep</div><div class="sub">Asisten kerja • Mode offline tanpa kuota + AI opsional</div><div class="pill" id="modeBadge">MODE OFFLINE: AKTIF</div></header>
 <section class="mission"><h3>🧠 Misi kerja</h3><p>Mode offline tidak memanggil API dan tidak menghabiskan kuota. Buat draf konten, rencana kerja, ide jasa, dan pesan calon klien langsung dari aplikasi.</p><div class="actions"><button id="runNow" class="primary">Buat paket kerja hari ini</button><button id="toggle">AI API: MATI</button></div></section>
 <section class="tools"><div class="tools-grid"><button data-task="facebook">📣 Konten Facebook</button><button data-task="client">🤝 Cari calon klien</button><button data-task="affiliate">🛍️ Rencana affiliate</button><button data-task="schedule">🗓️ Kalender konten</button><button data-task="service">💼 Jual jasa tanpa modal</button><button data-task="plan">✅ Rencana kerja 7 hari</button></div></section>
+<section class="tools" id="facebookTools"><h3>📘 Facebook Page</h3><p class="sub">Integrasi resmi untuk menerbitkan teks ke Facebook Page yang lu kelola. Token hanya disimpan sementara selama aplikasi terbuka dan tidak masuk riwayat.</p><div class="fields"><label><small>Facebook Page ID</small><input id="fbPageId" placeholder="Page ID dari Meta"></label><label><small>Page Access Token (rahasia)</small><input id="fbToken" type="password" placeholder="Tempel token Page di sini" autocomplete="off"></label><label><small>Isi postingan</small><textarea id="fbPostText" rows="4" placeholder="Teks yang akan dipublikasikan ke Facebook Page"></textarea></label><button id="fbGeneratePublish" class="primary">Buat caption dengan AI lalu terbitkan</button><button id="fbPublish">Terbitkan teks ini sekarang</button><small>Hanya Facebook Page, bukan profil pribadi. Perlu Page Access Token resmi dengan izin pages_manage_posts, pages_show_list, dan pages_read_engagement. Jangan kirim token ke chat atau membagikan screenshot yang menampilkan token. Setiap klik tombol menerbitkan konten ke Page.</small></div><div id="fbStatus" class="status">Facebook: belum terhubung</div></section>
 <details class="settings" id="settings"><summary>⚙️ Pengaturan AI online (opsional)</summary><div class="fields"><label><small>Penyedia</small><select id="provider"><option value="https://openrouter.ai/api/v1/chat/completions">OpenRouter</option><option value="https://api.openai.com/v1/chat/completions">OpenAI (dapat berbayar)</option></select></label><label><small>Model</small><input id="model" value="openrouter/free" placeholder="openrouter/free"></label><label><small>API key (disimpan di perangkat)</small><input id="key" type="password" placeholder="API key tidak dikirim ke pembuat aplikasi" autocomplete="off"></label><button id="save" class="primary">Simpan pengaturan</button><small>AI online hanya digunakan jika lu sendiri mengaktifkannya dan mengirim permintaan. Model gratis/kuota tidak dijamin oleh aplikasi.</small></div></details>
 <div class="messages" id="messages"><div class="msg bot">Bro, mode offline aktif. Gw tidak akan memanggil API atau memakai kuota lu secara otomatis. Pilih salah satu alat kerja di atas atau ketik tugas. AI online tetap mati sampai lu mengaktifkannya sendiri.</div></div>
 <div class="status" id="status">Status: offline — tidak memakai API</div><div class="notice">Aplikasi ini bisa menyiapkan draf dan rencana. Ia tidak otomatis memposting ke Facebook, mengirim pesan, transaksi, atau menjamin penghasilan.</div>
@@ -14,7 +15,7 @@
 const $=id=>document.getElementById(id),msgs=$('messages');let history=[],online=false,busy=false;
 try{$('provider').value=localStorage.getItem('ay_provider')||$('provider').value;$('model').value=localStorage.getItem('ay_model')||'openrouter/free';$('key').value=localStorage.getItem('ay_key')||'';online=localStorage.getItem('ay_online')==='1'}catch(e){}
 function add(t,w='bot'){let d=document.createElement('div');d.className='msg '+w;d.textContent=t;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d}
-function setStatus(t){$('status').textContent='Status: '+t}
+function setStatus(t){$('status').textContent='Status: '+t}\nfunction fbStatus(t){$('fbStatus').textContent='Facebook: '+t}
 function saveHistory(){try{localStorage.setItem('ay_history',JSON.stringify(history.slice(-20)))}catch(e){}}
 function offlineWork(text){
  const t=(text||'').toLowerCase();
@@ -34,12 +35,12 @@ function offlineWork(text){
 async function askAI(text){
  if(busy)return;busy=true;$('send').disabled=true;
  try{
-  if(!online){const answer=offlineWork(text);add(answer);history.push({role:'user',content:text},{role:'assistant',content:answer});saveHistory();setStatus('offline — tidak memakai API');return}
+  if(!online){const answer=offlineWork(text);add(answer);history.push({role:'user',content:text},{role:'assistant',content:answer});saveHistory();setStatus('offline — tidak memakai API');return answer}
   const key=$('key').value.trim();if(!key){$('settings').open=true;add('AI online aktif tetapi API key belum diisi. Matikan AI online untuk kembali ke mode offline.');return}
   setStatus('menghubungi AI online…');const provider=$('provider').value,model=$('model').value.trim()||'openrouter/free';
   const sys='Kamu adalah AI Asisten Yosep. Jawab bahasa Indonesia, fokus pada hasil praktis yang dapat diperiksa. Jangan mengaku telah melakukan aksi eksternal yang belum dilakukan. Jangan meminta rahasia.';
   const recent=history.slice(-8);const res=await fetch(provider,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,max_tokens:700,messages:[{role:'system',content:sys},...recent,{role:'user',content:text}]})});
-  const data=await res.json();if(!res.ok)throw Error(data?.error?.message||'HTTP '+res.status);const answer=data?.choices?.[0]?.message?.content;if(!answer)throw Error('Balasan AI kosong');add(answer);history.push({role:'user',content:text},{role:'assistant',content:answer});saveHistory();setStatus('AI online selesai');
+  const data=await res.json();if(!res.ok)throw Error(data?.error?.message||'HTTP '+res.status);const answer=data?.choices?.[0]?.message?.content;if(!answer)throw Error('Balasan AI kosong');add(answer);history.push({role:'user',content:text},{role:'assistant',content:answer});saveHistory();setStatus('AI online selesai');return answer;
  }catch(e){add('Permintaan online gagal: '+e.message+'\nMode offline tetap tersedia tanpa memakai API.');setStatus('online gagal')}
  finally{busy=false;$('send').disabled=false}
 }
@@ -49,6 +50,26 @@ $('toggle').onclick=()=>{setOnline(!online);if(online){$('settings').open=true;a
 $('save').onclick=()=>{try{localStorage.setItem('ay_provider',$('provider').value);localStorage.setItem('ay_model',$('model').value.trim()||'openrouter/free');localStorage.setItem('ay_key',$('key').value.trim());add('Pengaturan disimpan di perangkat. API key tidak dikirim ke pembuat aplikasi.')}catch(e){add('Penyimpanan pengaturan gagal.')}};
 $('runNow').onclick=()=>askAI('Buat paket kerja hari ini: konten Facebook, rencana mencari klien, ide affiliate yang jujur, dan prioritas tindakan.');
 document.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>{const tasks={facebook:'Buat konten Facebook',client:'Bantu mencari calon klien',affiliate:'Buat rencana affiliate',schedule:'Buat kalender konten 7 hari',service:'Rencana menjual jasa tanpa modal',plan:'Buat rencana kerja 7 hari'};askAI(tasks[b.dataset.task])});
-$('form').onsubmit=e=>{e.preventDefault();const t=$('prompt').value.trim();if(!t)return;$('prompt').value='';add(t,'user');askAI(t)};
+
+async function publishToFacebook(text){
+ const pageId=$('fbPageId').value.trim(),token=$('fbToken').value.trim();
+ if(!pageId||!token||!text.trim()){fbStatus('isi Page ID, Page Access Token, dan teks postingan terlebih dahulu');return false}
+ if(!confirm('Terbitkan postingan ini ke Facebook Page sekarang?'))return false;
+ fbStatus('sedang menerbitkan…');
+ try{
+  const body=new URLSearchParams();body.set('message',text.trim());body.set('access_token',token);
+  const r=await fetch('https://graph.facebook.com/v26.0/'+encodeURIComponent(pageId)+'/feed',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body.toString()});
+  const d=await r.json();if(!r.ok||d.error)throw Error(d.error?.message||'HTTP '+r.status);
+  fbStatus('berhasil diterbitkan. ID postingan: '+(d.id||d.post_id||'diterima oleh Meta'));return true;
+ }catch(e){fbStatus('gagal: '+e.message+'. Periksa izin/token atau pembatasan jaringan.');return false}
+}
+$('fbPublish').onclick=()=>publishToFacebook($('fbPostText').value);
+$('fbGeneratePublish').onclick=async()=>{
+ const answer=await askAI('Tulis SATU postingan Facebook berbahasa Indonesia yang siap diterbitkan untuk mempromosikan jasa pembuatan konten media sosial bagi UMKM. Maksimal 100 kata, pembuka menarik, manfaat realistis, ajakan bertindak sopan. Keluarkan hanya teks postingan, jangan tambahkan penjelasan atau beberapa pilihan.');
+ if(!answer)return;
+ $('fbPostText').value=answer;
+ await publishToFacebook(answer);
+};
+\n$('form').onsubmit=e=>{e.preventDefault();const t=$('prompt').value.trim();if(!t)return;$('prompt').value='';add(t,'user');askAI(t)};
 setOnline(online);
 </script></body></html>
