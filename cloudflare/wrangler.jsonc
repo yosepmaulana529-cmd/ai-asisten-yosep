@@ -13,12 +13,12 @@
     {
       "binding": "DB",
       "database_name": "ai-asisten-yosep",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "525d0b85-8324-4b38-b8ee-0f6191c9e833",
       "migrations_dir": "migrations"
     }
   ],
   "vars": {
     "DAILY_MESSAGE_LIMIT": "50",
-    "OWNER_EMAIL": ""
+    "OWNER_EMAIL": "yosepmaulana529@gmail.com"
   }
 }
