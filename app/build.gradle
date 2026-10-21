@@ -1,0 +1,13 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.yosep.aiassistant'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.yosep.aiassistant'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+    }
+}
