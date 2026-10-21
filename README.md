@@ -1,15 +1,14 @@
 # AI Asisten Yosep
 
-Aplikasi Android WebView untuk membuka AI Asisten Yosep.
+Proyek awal aplikasi Android berbasis WebView. GitHub Actions membangun APK debug dan menyimpan hasilnya sebagai artifact.
 
-## Membuat APK gratis
-1. Buka tab **Actions** di repositori GitHub.
-2. Pilih **Build AI Asisten Yosep APK**.
-3. Tekan **Run workflow** lalu **Run workflow** lagi.
-4. Tunggu sampai status hijau.
-5. Buka hasil workflow, bagian **Artifacts**, unduh `AI-Asisten-Yosep-debug-apk`, lalu ekstrak ZIP dan instal APK di Android.
+## Cara mendapatkan APK
+1. Buka tab Actions.
+2. Pilih workflow **Build AI Asisten Yosep APK**.
+3. Setelah run sukses, buka hasilnya dan unduh artifact **AI-Asisten-Yosep-APK**. Ekstrak ZIP untuk mendapatkan `app-debug.apk`.
 
-Pembuatan APK dilakukan GitHub Actions. APK debug cocok untuk uji coba dan mungkin perlu mengizinkan instalasi dari sumber ini di Android.
+## Koneksi AI
+Aplikasi membutuhkan API key dari penyedia API kompatibel OpenAI. Isi pengaturan koneksi di aplikasi. Model gratis dan kuota mengikuti penyedia; jangan menyimpan API key di repositori publik.
 
-## Catatan
-Aplikasi membuka layanan web di `https://ais-dev-4pw5c6nhl4o2j5hn4xs7f4-138243459135.asia-east1.run.app/`. Fitur AI memerlukan layanan web tersebut tetap aktif dan internet. Aplikasi ini tidak menjamin penghasilan otomatis.
+## Batasan
+Ini APK debug awal, belum aplikasi rilis Play Store. Belum mengotomatisasi Facebook, membuat gambar/video secara native, atau menjalankan tugas latar belakang. API key tersimpan lokal di WebView; untuk produksi diperlukan backend yang aman.
