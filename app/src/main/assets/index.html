@@ -4,6 +4,7 @@
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,Roboto,sans-serif;background:#0b1220;color:#f5f7fb;min-height:100dvh;display:flex;flex-direction:column}.top{padding:16px;background:#111c2f;border-bottom:1px solid #26344b}.brand{font-weight:800;font-size:21px}.sub,small{font-size:12px;color:#aebbd0}.settings,.mission,.tools{padding:12px 14px;background:#101827;border-bottom:1px solid #26344b}.settings summary{cursor:pointer;font-size:13px;color:#b9c8dc}.fields{display:grid;gap:8px;margin-top:10px}input,select,textarea,button{font:inherit;border-radius:12px;border:1px solid #33445e;padding:12px;background:#101827;color:#f5f7fb;width:100%}button{cursor:pointer}button.primary{background:#3578e5;border-color:#3578e5;font-weight:750}button:disabled{opacity:.55}.mission h3{margin:0 0 5px;font-size:16px}.mission p{font-size:13px;color:#b9c8dc;margin:0 0 10px}.actions{display:flex;gap:8px}.actions button{flex:1}.tools-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.tools-grid button{font-size:13px;text-align:left}.messages{padding:16px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:160px}.msg{max-width:95%;padding:12px 14px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}.bot{background:#1b2940;align-self:flex-start}.user{background:#2457a6;align-self:flex-end}.status,.notice{font-size:12px;padding:8px 14px;background:#111c2f;color:#aebbd0}.notice{color:#f2d18a}.composer{padding:12px;background:#111c2f;border-top:1px solid #26344b;display:flex;gap:8px;align-items:flex-end}.composer textarea{resize:vertical;min-height:48px;max-height:140px;flex:1}.composer button{width:auto}.pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#1d3a30;color:#8fe0ad;font-size:11px;margin-top:7px}.row{display:flex;gap:8px}.row>*{flex:1}@media(min-width:760px){body{max-width:760px;margin:auto;width:100%;border-left:1px solid #26344b;border-right:1px solid #26344b}}
 </style></head><body>
 <header class="top"><div class="brand">✨ AI Asisten Yosep</div><div class="sub">Asisten kerja • Mode offline tanpa kuota + AI opsional</div><div class="pill" id="modeBadge">MODE OFFLINE: AKTIF</div></header>
+<section class="tools" id="workAgent"><h3>🧠 Agen Kerja Mandiri</h3><p class="sub">Berikan tujuan. AI akan memecahnya menjadi langkah, mengerjakan langkah satu per satu, menyimpan progres di HP, dan menyiapkan hasil untuk disalin atau diunduh. Tindakan luar seperti mengirim pesan, mengunggah konten, membayar, atau masuk akun tetap memerlukan persetujuan dan integrasi yang sesuai.</p><div class="fields"><label><small>Tujuan yang ingin diselesaikan</small><textarea id="agentGoal" rows="3" placeholder="Contoh: Buat paket jasa konten Facebook untuk UMKM dan siapkan materi promosi yang siap dipakai"></textarea></label><label><small>Instruksi tambahan / batasan</small><textarea id="agentContext" rows="2" placeholder="Contoh: tanpa modal, bahasa Indonesia, target usaha kecil"></textarea></label><div class="row"><button id="agentPlan" class="primary">Buat rencana kerja</button><button id="agentRunNext">Kerjakan langkah berikutnya</button></div><div class="row"><button id="agentReset">Mulai tujuan baru</button><button id="agentExport">Unduh hasil kerja (.txt)</button></div><div id="agentStatus" class="status">Agen siap. Aktifkan AI API dan pastikan model tersedia di Pengaturan untuk menjalankan pekerjaan AI.</div><div id="agentPlanView" class="fields"></div><h4>Hasil kerja</h4><div id="agentOutput" class="msg bot" style="max-width:100%;min-height:48px;white-space:pre-wrap">Hasil tiap langkah akan tersimpan di perangkat ini.</div></div></section>
 <section class="tools" id="translator"><h3>🌐 Penerjemah Percakapan</h3><p class="sub">Terjemahkan pesan saat ngobrol. Untuk terjemahan AI dan percakapan lewat mikrofon, aktifkan AI API dan isi API key di Pengaturan. Mikrofon bergantung pada izin dan dukungan Android WebView.</p><div class="fields"><div class="row"><label><small>Dari bahasa</small><select id="trFrom"><option value="Indonesian">Indonesia</option><option value="English">Inggris</option><option value="Filipino/Tagalog">Filipino / Tagalog</option><option value="Malay">Melayu</option><option value="Arabic">Arab</option><option value="Chinese (Simplified)">Mandarin</option><option value="Japanese">Jepang</option><option value="Korean">Korea</option><option value="Spanish">Spanyol</option><option value="Thai">Thailand</option></select></label><label><small>Ke bahasa</small><select id="trTo"><option value="English">Inggris</option><option value="Indonesian">Indonesia</option><option value="Filipino/Tagalog">Filipino / Tagalog</option><option value="Malay">Melayu</option><option value="Arabic">Arab</option><option value="Chinese (Simplified)">Mandarin</option><option value="Japanese">Jepang</option><option value="Korean">Korea</option><option value="Spanish">Spanyol</option><option value="Thai">Thailand</option></select></label></div><textarea id="trInput" rows="3" placeholder="Ketik ucapan orang itu, atau gunakan mikrofon…"></textarea><button id="trTranslate" class="primary">Terjemahkan</button><div class="row"><button id="trMic">🎙️ Mulai dengarkan</button><button id="trStop">⏹ Berhenti</button></div><div id="trResult" class="msg bot" style="max-width:100%;min-height:48px">Hasil terjemahan akan muncul di sini.</div><div class="row"><button id="trSpeak">🔊 Bacakan terjemahan</button><button id="trSwap">⇄ Tukar bahasa</button></div><label><small><input id="trAutoSpeak" type="checkbox" style="width:auto"> Bacakan hasil otomatis saat mode mikrofon aktif</small></label><small id="trStatus">Penerjemah siap. Terjemahan AI memerlukan internet dan API key yang aktif.</small></div></section>
 <section class="mission"><h3>🧠 Misi kerja</h3><p>Mode offline tidak memanggil API dan tidak menghabiskan kuota. Buat draf konten, rencana kerja, ide jasa, dan pesan calon klien langsung dari aplikasi.</p><div class="actions"><button id="runNow" class="primary">Buat paket kerja hari ini</button><button id="runMission">🚀 Jalankan misi mandiri</button><button id="toggle">AI API: MATI</button></div></section>
 <section class="tools"><div class="tools-grid"><button data-task="facebook">📣 Konten Facebook</button><button data-task="client">🤝 Cari calon klien</button><button data-task="affiliate">🛍️ Rencana affiliate</button><button data-task="schedule">🗓️ Kalender konten</button><button data-task="service">💼 Jual jasa tanpa modal</button><button data-task="plan">✅ Rencana kerja 7 hari</button></div></section>
@@ -196,6 +197,62 @@ try{const prev=JSON.parse(localStorage.getItem('ay_sw_last')||'null');if(prev){$
 $('form').onsubmit=e=>{e.preventDefault();const t=$('prompt').value.trim();if(!t)return;$('prompt').value='';add(t,'user');askAI(t)};
 setOnline(online);
 
+
+
+// Agen kerja bertahap: perencanaan, eksekusi per langkah, simpan lokal, ekspor.
+let agentState={goal:'',context:'',steps:[],results:[],createdAt:''};
+function agentStatus(s){$('agentStatus').textContent=s}
+function agentLoad(){try{const s=JSON.parse(localStorage.getItem('ay_agent_state')||'null');if(s&&Array.isArray(s.steps)){agentState=s;$('agentGoal').value=s.goal||'';$('agentContext').value=s.context||'';agentRender()}}catch(e){}}
+function agentSave(){try{localStorage.setItem('ay_agent_state',JSON.stringify(agentState))}catch(e){agentStatus('Penyimpanan penuh/tidak tersedia. Salin atau unduh hasil secara berkala.')}}
+function agentDone(i){return !!(agentState.results[i]&&agentState.results[i].trim())}
+function agentRender(){
+ const host=$('agentPlanView');host.replaceChildren();
+ if(!agentState.steps.length){host.textContent='Belum ada rencana. Tekan “Buat rencana kerja”.';}
+ else {agentState.steps.forEach((step,i)=>{const card=document.createElement('div');card.style.cssText='padding:10px;border:1px solid #33445e;border-radius:12px;background:#0b1220';
+ const title=document.createElement('strong');title.textContent=(agentDone(i)?'✅ ':'⬜ ')+(i+1)+'. '+step;card.appendChild(title);
+ if(agentDone(i)){const preview=document.createElement('p');preview.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;color:#b9c8dc';preview.textContent=agentState.results[i].slice(0,320)+(agentState.results[i].length>320?'…':'');card.appendChild(preview)}
+ host.appendChild(card)})}
+ const all=agentState.results.map((r,i)=>r?'LANGKAH '+(i+1)+': '+agentState.steps[i]+'\n'+r:'').filter(Boolean).join('\n\n--------------------\n\n');
+ $('agentOutput').textContent=all||'Hasil tiap langkah akan tersimpan di perangkat ini.';
+ const next=agentState.steps.findIndex((_,i)=>!agentDone(i));
+ $('agentRunNext').disabled=!agentState.steps.length||next<0;
+}
+async function agentCall(messages,maxTokens=1200){
+ const key=$('key').value.trim();if(!online||!key)throw new Error('Aktifkan AI API dan isi API key di Pengaturan terlebih dahulu.');
+ const endpoint=$('provider').value,model=$('model').value.trim()||'openrouter/free';
+ const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,temperature:0.3,max_tokens:maxTokens,messages})});
+ let data={};try{data=await res.json()}catch(e){}
+ if(!res.ok)throw new Error(data.error?.message||'AI gagal ('+res.status+'). Periksa model, API key, kuota, dan internet.');
+ const out=data.choices?.[0]?.message?.content?.trim();if(!out)throw new Error('AI tidak mengembalikan isi pekerjaan.');return out;
+}
+$('agentPlan').onclick=async()=>{
+ const goal=$('agentGoal').value.trim(),context=$('agentContext').value.trim();
+ if(!goal){agentStatus('Tulis tujuan yang ingin diselesaikan terlebih dahulu.');return}
+ $('agentPlan').disabled=true;agentStatus('AI sedang menyusun rencana…');
+ try{
+  const raw=await agentCall([{role:'system',content:'You are a practical project planner. Return ONLY valid JSON, no markdown: {"steps":["...","..."]}. Create 3 to 8 ordered, concrete work steps to accomplish the user goal. Each step must be an artifact or action the AI can perform within chat/app text generation. Do not claim external actions, account access, purchases, uploads, or messages are completed. Prioritize usable deliverables. Indonesian language.'},{role:'user',content:'TUJUAN: '+goal+'\nBATASAN: '+(context||'Tidak ada batasan tambahan')+'\nBuat rencana yang realistis dan bisa dikerjakan bertahap.'}],800);
+  let obj;try{obj=JSON.parse(raw.replace(/^\s*```(?:json)?/i,'').replace(/```\s*$/,'').trim())}catch(e){const match=raw.match(/\{[\s\S]*\}/);if(match)obj=JSON.parse(match[0]);else throw new Error('Format rencana dari AI tidak valid. Coba lagi.')}
+  const steps=Array.isArray(obj.steps)?obj.steps.filter(x=>typeof x==='string'&&x.trim()).slice(0,8):[];
+  if(!steps.length)throw new Error('AI belum memberikan langkah kerja yang bisa digunakan.');
+  agentState={goal,context,steps,results:steps.map(()=>''),createdAt:new Date().toISOString()};agentSave();agentRender();agentStatus('Rencana siap: '+steps.length+' langkah. Tekan “Kerjakan langkah berikutnya” untuk mulai.'); 
+ }catch(e){agentStatus(e.message||'Gagal membuat rencana.')}
+ finally{$('agentPlan').disabled=false}
+};
+$('agentRunNext').onclick=async()=>{
+ const i=agentState.steps.findIndex((_,idx)=>!agentDone(idx));if(i<0){agentStatus('Semua langkah dalam rencana sudah dikerjakan.');return}
+ $('agentRunNext').disabled=true;agentStatus('Mengerjakan langkah '+(i+1)+' dari '+agentState.steps.length+'…');
+ try{
+  const prior=agentState.results.map((r,j)=>r?'Langkah '+(j+1)+' ('+agentState.steps[j]+'):\n'+r:'').filter(Boolean).join('\n\n');
+  const result=await agentCall([{role:'system',content:'You are the execution engine of AI Asisten Yosep. Complete the requested work step now. Produce a concrete, ready-to-use deliverable in Indonesian, not merely advice about how the user could do it. Use previous completed work as context. Be accurate, state real limitations, never claim you accessed apps/accounts, contacted anyone, uploaded/published anything, spent money, or earned revenue unless the tool explicitly did so. If the step requires an external action unavailable here, prepare all required content and state the exact approval/integration needed.'},{role:'user',content:'TUJUAN UTAMA: '+agentState.goal+'\nBATASAN: '+(agentState.context||'Tidak ada')+'\nLANGKAH YANG HARUS DIKERJAKAN SEKARANG ('+(i+1)+'/'+agentState.steps.length+'): '+agentState.steps[i]+'\nHASIL LANGKAH SEBELUMNYA:\n'+(prior||'Belum ada')+'\n\nKerjakan langkah ini sampai menghasilkan keluaran yang konkret.'}],1800);
+  agentState.results[i]=result;agentSave();agentRender();
+  const next=agentState.steps.findIndex((_,idx)=>!agentDone(idx));
+  agentStatus(next<0?'Semua langkah selesai. Hasil tersimpan di perangkat ini; periksa hasil dan lakukan tindakan luar yang memerlukan persetujuan.':'Langkah '+(i+1)+' selesai. Tekan “Kerjakan langkah berikutnya” untuk melanjutkan.');
+ }catch(e){agentStatus(e.message||'Langkah gagal.')}
+ finally{agentRender()}
+};
+$('agentReset').onclick=()=>{agentState={goal:$('agentGoal').value.trim(),context:$('agentContext').value.trim(),steps:[],results:[],createdAt:''};agentSave();agentRender();agentStatus('Rencana dihapus. Isi tujuan lalu buat rencana baru.')};
+$('agentExport').onclick=()=>{const text='AI ASISTEN YOSEP — HASIL AGEN KERJA\nTUJUAN: '+agentState.goal+'\nBATASAN: '+agentState.context+'\n\n'+agentState.steps.map((s,i)=>'LANGKAH '+(i+1)+': '+s+'\nSTATUS: '+(agentDone(i)?'SELESAI':'BELUM DIKERJAKAN')+'\n'+(agentState.results[i]||'') ).join('\n\n--------------------\n\n');const blob=new Blob([text],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='hasil-agen-kerja-yosep.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);agentStatus('File hasil kerja disiapkan untuk diunduh.')};
+agentLoad();
 
 // Penerjemah percakapan: AI terjemahan, pengenalan suara, dan pembacaan hasil.
 let trRecognition=null, trListening=false;
