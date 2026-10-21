@@ -1,0 +1,12 @@
+{
+  "name": "ai-asisten-yosep-cloudflare",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "db:migrations:apply": "wrangler d1 migrations apply DB --remote",
+    "deploy": "npm run db:migrations:apply && wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.44.0"
+  }
+}
