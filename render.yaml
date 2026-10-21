@@ -11,10 +11,12 @@ services:
         value: 3.12.8
       - key: SECRET_KEY
         generateValue: true
-      - key: HERMES_BASE_URL
+      - key: AI_BASE_URL
+        value: https://openrouter.ai/api
+      - key: AI_API_KEY
         sync: false
-      - key: HERMES_API_KEY
-        sync: false
+      - key: AI_MODEL
+        value: openrouter/free
       - key: OWNER_EMAIL
         sync: false
       - key: DAILY_MESSAGE_LIMIT
