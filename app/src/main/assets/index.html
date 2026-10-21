@@ -15,7 +15,8 @@
 const $=id=>document.getElementById(id),msgs=$('messages');let history=[],online=false,busy=false;
 try{$('provider').value=localStorage.getItem('ay_provider')||$('provider').value;$('model').value=localStorage.getItem('ay_model')||'openrouter/free';$('key').value=localStorage.getItem('ay_key')||'';online=localStorage.getItem('ay_online')==='1'}catch(e){}
 function add(t,w='bot'){let d=document.createElement('div');d.className='msg '+w;d.textContent=t;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d}
-function setStatus(t){$('status').textContent='Status: '+t}\nfunction fbStatus(t){$('fbStatus').textContent='Facebook: '+t}
+function setStatus(t){$('status').textContent='Status: '+t}
+function fbStatus(t){$('fbStatus').textContent='Facebook: '+t}
 function saveHistory(){try{localStorage.setItem('ay_history',JSON.stringify(history.slice(-20)))}catch(e){}}
 function offlineWork(text){
  const t=(text||'').toLowerCase();
@@ -70,6 +71,7 @@ $('fbGeneratePublish').onclick=async()=>{
  $('fbPostText').value=answer;
  await publishToFacebook(answer);
 };
-\n$('form').onsubmit=e=>{e.preventDefault();const t=$('prompt').value.trim();if(!t)return;$('prompt').value='';add(t,'user');askAI(t)};
+
+$('form').onsubmit=e=>{e.preventDefault();const t=$('prompt').value.trim();if(!t)return;$('prompt').value='';add(t,'user');askAI(t)};
 setOnline(online);
 </script></body></html>
