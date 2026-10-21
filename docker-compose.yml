@@ -1,0 +1,25 @@
+services:
+  ai-asisten-yosep:
+    build:
+      context: ./hermes-web
+      dockerfile: Dockerfile
+    container_name: ai-asisten-yosep
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_PATH: /data/data.sqlite3
+      PORT: "8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - yosep_data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  yosep_data:
