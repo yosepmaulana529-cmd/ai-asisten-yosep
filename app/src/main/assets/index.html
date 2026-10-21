@@ -4,6 +4,7 @@
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,Roboto,sans-serif;background:#0b1220;color:#f5f7fb;min-height:100dvh;display:flex;flex-direction:column}.top{padding:16px;background:#111c2f;border-bottom:1px solid #26344b}.brand{font-weight:800;font-size:21px}.sub,small{font-size:12px;color:#aebbd0}.settings,.mission,.tools{padding:12px 14px;background:#101827;border-bottom:1px solid #26344b}.settings summary{cursor:pointer;font-size:13px;color:#b9c8dc}.fields{display:grid;gap:8px;margin-top:10px}input,select,textarea,button{font:inherit;border-radius:12px;border:1px solid #33445e;padding:12px;background:#101827;color:#f5f7fb;width:100%}button{cursor:pointer}button.primary{background:#3578e5;border-color:#3578e5;font-weight:750}button:disabled{opacity:.55}.mission h3{margin:0 0 5px;font-size:16px}.mission p{font-size:13px;color:#b9c8dc;margin:0 0 10px}.actions{display:flex;gap:8px}.actions button{flex:1}.tools-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.tools-grid button{font-size:13px;text-align:left}.messages{padding:16px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:160px}.msg{max-width:95%;padding:12px 14px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}.bot{background:#1b2940;align-self:flex-start}.user{background:#2457a6;align-self:flex-end}.status,.notice{font-size:12px;padding:8px 14px;background:#111c2f;color:#aebbd0}.notice{color:#f2d18a}.composer{padding:12px;background:#111c2f;border-top:1px solid #26344b;display:flex;gap:8px;align-items:flex-end}.composer textarea{resize:vertical;min-height:48px;max-height:140px;flex:1}.composer button{width:auto}.pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#1d3a30;color:#8fe0ad;font-size:11px;margin-top:7px}.row{display:flex;gap:8px}.row>*{flex:1}@media(min-width:760px){body{max-width:760px;margin:auto;width:100%;border-left:1px solid #26344b;border-right:1px solid #26344b}}
 </style></head><body>
 <header class="top"><div class="brand">✨ AI Asisten Yosep</div><div class="sub">Asisten kerja • Mode offline tanpa kuota + AI opsional</div><div class="pill" id="modeBadge">MODE OFFLINE: AKTIF</div></header>
+<section class="tools" id="translator"><h3>🌐 Penerjemah Percakapan</h3><p class="sub">Terjemahkan pesan saat ngobrol. Untuk terjemahan AI dan percakapan lewat mikrofon, aktifkan AI API dan isi API key di Pengaturan. Mikrofon bergantung pada izin dan dukungan Android WebView.</p><div class="fields"><div class="row"><label><small>Dari bahasa</small><select id="trFrom"><option value="Indonesian">Indonesia</option><option value="English">Inggris</option><option value="Filipino/Tagalog">Filipino / Tagalog</option><option value="Malay">Melayu</option><option value="Arabic">Arab</option><option value="Chinese (Simplified)">Mandarin</option><option value="Japanese">Jepang</option><option value="Korean">Korea</option><option value="Spanish">Spanyol</option><option value="Thai">Thailand</option></select></label><label><small>Ke bahasa</small><select id="trTo"><option value="English">Inggris</option><option value="Indonesian">Indonesia</option><option value="Filipino/Tagalog">Filipino / Tagalog</option><option value="Malay">Melayu</option><option value="Arabic">Arab</option><option value="Chinese (Simplified)">Mandarin</option><option value="Japanese">Jepang</option><option value="Korean">Korea</option><option value="Spanish">Spanyol</option><option value="Thai">Thailand</option></select></label></div><textarea id="trInput" rows="3" placeholder="Ketik ucapan orang itu, atau gunakan mikrofon…"></textarea><button id="trTranslate" class="primary">Terjemahkan</button><div class="row"><button id="trMic">🎙️ Mulai dengarkan</button><button id="trStop">⏹ Berhenti</button></div><div id="trResult" class="msg bot" style="max-width:100%;min-height:48px">Hasil terjemahan akan muncul di sini.</div><div class="row"><button id="trSpeak">🔊 Bacakan terjemahan</button><button id="trSwap">⇄ Tukar bahasa</button></div><label><small><input id="trAutoSpeak" type="checkbox" style="width:auto"> Bacakan hasil otomatis saat mode mikrofon aktif</small></label><small id="trStatus">Penerjemah siap. Terjemahan AI memerlukan internet dan API key yang aktif.</small></div></section>
 <section class="mission"><h3>🧠 Misi kerja</h3><p>Mode offline tidak memanggil API dan tidak menghabiskan kuota. Buat draf konten, rencana kerja, ide jasa, dan pesan calon klien langsung dari aplikasi.</p><div class="actions"><button id="runNow" class="primary">Buat paket kerja hari ini</button><button id="runMission">🚀 Jalankan misi mandiri</button><button id="toggle">AI API: MATI</button></div></section>
 <section class="tools"><div class="tools-grid"><button data-task="facebook">📣 Konten Facebook</button><button data-task="client">🤝 Cari calon klien</button><button data-task="affiliate">🛍️ Rencana affiliate</button><button data-task="schedule">🗓️ Kalender konten</button><button data-task="service">💼 Jual jasa tanpa modal</button><button data-task="plan">✅ Rencana kerja 7 hari</button></div></section>
 <section class="tools" id="facebookTools"><h3>📘 Facebook Page</h3><p class="sub">Integrasi resmi untuk menerbitkan teks ke Facebook Page yang lu kelola. Token hanya disimpan sementara selama aplikasi terbuka dan tidak masuk riwayat.</p><div class="fields"><label><small>Facebook Page ID</small><input id="fbPageId" placeholder="Page ID dari Meta"></label><label><small>Page Access Token (rahasia)</small><input id="fbToken" type="password" placeholder="Tempel token Page di sini" autocomplete="off"></label><label><small>Isi postingan</small><textarea id="fbPostText" rows="4" placeholder="Teks yang akan dipublikasikan ke Facebook Page"></textarea></label><button id="fbGeneratePublish" class="primary">Buat caption dengan AI lalu terbitkan</button><button id="fbPublish">Terbitkan teks ini sekarang</button><small>Hanya Facebook Page, bukan profil pribadi. Perlu Page Access Token resmi dengan izin pages_manage_posts, pages_show_list, dan pages_read_engagement. Jangan kirim token ke chat atau membagikan screenshot yang menampilkan token. Setiap klik tombol menerbitkan konten ke Page.</small></div><div id="fbStatus" class="status">Facebook: belum terhubung</div></section>
@@ -194,6 +195,51 @@ try{const prev=JSON.parse(localStorage.getItem('ay_sw_last')||'null');if(prev){$
 
 $('form').onsubmit=e=>{e.preventDefault();const t=$('prompt').value.trim();if(!t)return;$('prompt').value='';add(t,'user');askAI(t)};
 setOnline(online);
+
+
+// Penerjemah percakapan: AI terjemahan, pengenalan suara, dan pembacaan hasil.
+let trRecognition=null, trListening=false;
+function trStatus(s){$('trStatus').textContent=s}
+function trSpeechLang(name){return ({'Indonesian':'id-ID','English':'en-US','Filipino/Tagalog':'fil-PH','Malay':'ms-MY','Arabic':'ar-SA','Chinese (Simplified)':'zh-CN','Japanese':'ja-JP','Korean':'ko-KR','Spanish':'es-ES','Thai':'th-TH'})[name]||'en-US'}
+async function trTranslateText(input){
+ const text=input.trim(); if(!text) throw new Error('Masukkan teks atau mulai mikrofon terlebih dahulu.');
+ if($('trFrom').value===$('trTo').value) return text;
+ const key=$('key').value.trim();
+ if(!online||!key) throw new Error('Untuk menerjemahkan kalimat bebas, aktifkan AI API dan isi API key di Pengaturan. Tanpa itu, penerjemah AI belum dapat digunakan.');
+ const endpoint=$('provider').value, model=$('model').value.trim()||'openrouter/free';
+ const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,temperature:0.1,max_tokens:500,messages:[{role:'system',content:'You are a precise conversation interpreter. Translate the user text from '+$('trFrom').value+' into '+$('trTo').value+'. Return only the translation, preserving meaning, tone, names, and numbers. If ambiguous, give the most natural translation without adding explanations.'},{role:'user',content:text}]})});
+ const data=await response.json(); if(!response.ok) throw new Error(data.error?.message||'Permintaan terjemahan gagal ('+response.status+').');
+ const out=data.choices?.[0]?.message?.content?.trim();if(!out)throw new Error('AI tidak mengembalikan hasil terjemahan.');return out;
+}
+async function trDoTranslate(text,autoSpeak=false){
+ $('trTranslate').disabled=true;trStatus('Menerjemahkan…');
+ try{const out=await trTranslateText(text||$('trInput').value);$('trResult').textContent=out;trStatus('Selesai menerjemahkan.');if(autoSpeak||$('trAutoSpeak').checked)trSpeakResult()}
+ catch(e){$('trResult').textContent='';trStatus(e.message||'Terjemahan gagal. Periksa internet, API key, dan model.')}
+ finally{$('trTranslate').disabled=false}
+}
+function trSpeakResult(){
+ const text=$('trResult').textContent.trim();if(!text||text==='Hasil terjemahan akan muncul di sini.')return;
+ if(!('speechSynthesis' in window)){trStatus('Fitur suara keluar tidak didukung pada perangkat ini.');return}
+ window.speechSynthesis.cancel();const utter=new SpeechSynthesisUtterance(text);utter.lang=trSpeechLang($('trTo').value);window.speechSynthesis.speak(utter)
+}
+function trStopListening(){trListening=false;try{if(trRecognition)trRecognition.stop()}catch(e){}$('trMic').textContent='🎙️ Mulai dengarkan';trStatus('Mikrofon dihentikan.')}
+$('trTranslate').onclick=()=>trDoTranslate($('trInput').value);
+$('trSpeak').onclick=trSpeakResult;
+$('trSwap').onclick=()=>{const a=$('trFrom'),b=$('trTo'),v=a.value;a.value=b.value;b.value=v;const input=$('trInput').value;$('trInput').value=$('trResult').textContent;$('trResult').textContent=input||'Hasil terjemahan akan muncul di sini.'};
+$('trStop').onclick=trStopListening;
+$('trMic').onclick=()=>{
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){trStatus('Mikrofon otomatis belum didukung WebView ini. Coba buka aplikasi di Chrome atau ketik kalimat di kotak teks.');return}
+ if(trListening){trStopListening();return}
+ try{
+  trRecognition=new SR();trRecognition.lang=trSpeechLang($('trFrom').value);trRecognition.continuous=true;trRecognition.interimResults=false;
+  trRecognition.onstart=()=>{trListening=true;$('trMic').textContent='🎙️ Sedang mendengarkan…';trStatus('Dengarkan ucapan, lalu hasilnya akan diterjemahkan. Pastikan izin mikrofon diberikan.')};
+  trRecognition.onresult=async(event)=>{let phrase='';for(let i=event.resultIndex;i<event.results.length;i++){if(event.results[i].isFinal)phrase+=event.results[i][0].transcript+' '}if(phrase.trim()){$('trInput').value=phrase.trim();await trDoTranslate(phrase.trim(),$('trAutoSpeak').checked)}};
+  trRecognition.onerror=(e)=>trStatus('Mikrofon: '+(e.error==='not-allowed'?'izin mikrofon ditolak. Izinkan mikrofon pada pengaturan aplikasi/browser.':e.error||'terjadi kesalahan.'));
+  trRecognition.onend=()=>{trListening=false;$('trMic').textContent='🎙️ Mulai dengarkan'};
+  trRecognition.start()
+ }catch(e){trStatus('Tidak bisa memulai mikrofon. Periksa izin mikrofon atau coba Chrome.')}
+};
 
 // Autopilot lokal: saat aplikasi dibuka, siapkan paket kerja sekali per hari.
 // Tidak menjalankan API online otomatis dan tidak melakukan tindakan eksternal.
