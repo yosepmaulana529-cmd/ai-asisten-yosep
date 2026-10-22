@@ -121,4 +121,4 @@ async function handle(request, env) {
   }
   return env.ASSETS.fetch(request);
 }
-export default { async fetch(request, env) { try { return await handle(request,env); } catch(e) { return json({detail:"Kesalahan server. Periksa konfigurasi dan database."},500); } } };
+export default { async fetch(request, env) { try { return await handle(request,env); } catch(e) { console.error("AI Asisten Yosep Worker error:", e && e.stack ? e.stack : String(e)); return json({detail:"Kesalahan server. Periksa konfigurasi dan database."},500); } } };
