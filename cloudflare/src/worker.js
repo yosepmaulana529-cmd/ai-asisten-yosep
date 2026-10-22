@@ -14,30 +14,46 @@ async function sign(value, secret) {
   const key = await crypto.subtle.importKey("raw", encoder.encode(secret), {name:"HMAC",hash:"SHA-256"}, false, ["sign"]);
   return b64(await crypto.subtle.sign("HMAC", key, encoder.encode(value)));
 }
+async function getSessionSecret(env) {
+  if (env.SESSION_SECRET && env.SESSION_SECRET.length >= 32) return env.SESSION_SECRET;
+  // Free fallback: persist a random signing key in D1; never expose it to the browser.
+  try {
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)").run();
+    let row = await env.DB.prepare("SELECT value FROM app_config WHERE key='session_secret'").first();
+    if (!row) {
+      const generated = b64(crypto.getRandomValues(new Uint8Array(48)));
+      await env.DB.prepare("INSERT OR IGNORE INTO app_config(key,value) VALUES('session_secret',?)").bind(generated).run();
+      row = await env.DB.prepare("SELECT value FROM app_config WHERE key='session_secret'").first();
+    }
+    return row && row.value && row.value.length >= 32 ? row.value : null;
+  } catch { return null; }
+}
 async function sessionToken(uid, env) {
-  if (!env.SESSION_SECRET || env.SESSION_SECRET.length < 32) throw new Error("SESSION_SECRET must be at least 32 characters");
+  const secret = await getSessionSecret(env);
+  if (!secret) throw new Error("Session secret unavailable");
   const payload = uid + "." + (Math.floor(Date.now()/1000) + 1209600);
-  return payload + "." + await sign(payload, env.SESSION_SECRET);
+  return payload + "." + await sign(payload, secret);
 }
 async function currentUser(request, env) {
   const cookies = Object.fromEntries((request.headers.get("Cookie")||"").split(";").map(v=>v.trim().split(/=(.*)/s).slice(0,2)).filter(v=>v.length===2));
   const token = cookies[COOKIE] || "";
   const parts = token.split(".");
-  if (parts.length !== 3 || !env.SESSION_SECRET || env.SESSION_SECRET.length < 32) return null;
+  const secret = await getSessionSecret(env);
+  if (parts.length !== 3 || !secret) return null;
   const payload = parts[0]+"."+parts[1];
-  if (Number(parts[1]) < Math.floor(Date.now()/1000) || await sign(payload,env.SESSION_SECRET) !== parts[2]) return null;
+  if (Number(parts[1]) < Math.floor(Date.now()/1000) || await sign(payload,secret) !== parts[2]) return null;
   return await env.DB.prepare("SELECT id,email,role FROM users WHERE id=?").bind(parts[0]).first();
 }
 const cookieHeader = (token, maxAge=1209600) => COOKIE+"="+token+"; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age="+maxAge;
 const dayKey = () => new Date().toISOString().slice(0,10);
 async function handle(request, env) {
   const url = new URL(request.url), path = url.pathname;
-  if (path === "/api/health" && request.method === "GET") { let dbReady=false; try { await env.DB.prepare("SELECT 1 AS ok").first(); dbReady=true; } catch {} return json({ok:true,ai_configured:!!env.AI,database_ready:dbReady,session_secret_ready:!!env.SESSION_SECRET && env.SESSION_SECRET.length>=32,owner_email_configured:!!env.OWNER_EMAIL}); }
+  if (path === "/api/health" && request.method === "GET") { let dbReady=false; try { await env.DB.prepare("SELECT 1 AS ok").first(); dbReady=true; } catch {} const sessionSecretReady = !!(await getSessionSecret(env)); return json({ok:true,ai_configured:!!env.AI,database_ready:dbReady,session_secret_ready:sessionSecretReady,owner_email_configured:!!env.OWNER_EMAIL}); }
   if (path === "/api/register" && request.method === "POST") {
     let a; try {a=await request.json()} catch{return fail("JSON tidak valid")}
     const email=String(a.email||"").trim().toLowerCase(), password=String(a.password||"");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length<10 || password.length>200) return fail("Email tidak valid atau kata sandi harus 10–200 karakter.");
-    if (!env.SESSION_SECRET || env.SESSION_SECRET.length<32) return fail("Server belum dikonfigurasi.",503);
+    if (!(await getSessionSecret(env))) return fail("Server belum siap: database belum bisa membuat kunci sesi. Coba lagi nanti.",503);
     let dbReady; try { dbReady=!!env.DB; await env.DB.prepare("SELECT 1").first(); } catch { return fail("Database akun belum terhubung atau tabel belum dibuat. Periksa binding D1 dan jalankan migrasi.",503); }
     const salt=b64(crypto.getRandomValues(new Uint8Array(16))), hash=await digestPassword(password,salt), id=crypto.randomUUID();
     const role=env.OWNER_EMAIL && email===env.OWNER_EMAIL.toLowerCase() ? "admin" : "user";
@@ -48,7 +64,7 @@ async function handle(request, env) {
   if (path === "/api/login" && request.method === "POST") {
     let a; try {a=await request.json()} catch{return fail("JSON tidak valid")}
     const email=String(a.email||"").trim().toLowerCase(), password=String(a.password||"");
-    if (!env.SESSION_SECRET || env.SESSION_SECRET.length<32) return fail("Server belum dikonfigurasi: SESSION_SECRET belum disetel.",503);
+    if (!(await getSessionSecret(env))) return fail("Server belum siap: database belum bisa membuat kunci sesi. Coba lagi nanti.",503);
     let u; try { u=await env.DB.prepare("SELECT * FROM users WHERE email=?").bind(email).first(); } catch { return fail("Database akun belum siap. Periksa binding D1 dan migrasi tabel users.",503); }
     if (!u || await digestPassword(password,u.salt) !== u.password_hash) return fail("Email atau kata sandi salah.",401);
     return json({ok:true,email:u.email,role:u.role},200,{"set-cookie":await sessionToken(u.id,env).then(t=>cookieHeader(t))});
