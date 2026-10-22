@@ -18,7 +18,6 @@ async function getSessionSecret(env) {
   if (env.SESSION_SECRET && env.SESSION_SECRET.length >= 32) return env.SESSION_SECRET;
   // Free fallback: persist a random signing key in D1; never expose it to the browser.
   try {
-    await env.DB.prepare("CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)").run();
     let row = await env.DB.prepare("SELECT value FROM app_config WHERE key='session_secret'").first();
     if (!row) {
       const generated = b64(crypto.getRandomValues(new Uint8Array(48)));
