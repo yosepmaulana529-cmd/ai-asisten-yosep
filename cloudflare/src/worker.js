@@ -49,16 +49,27 @@ async function handle(request, env) {
   const url = new URL(request.url), path = url.pathname;
   if (path === "/api/health" && request.method === "GET") { let dbReady=false; try { await env.DB.prepare("SELECT 1 AS ok").first(); dbReady=true; } catch {} const sessionSecretReady = !!(await getSessionSecret(env)); return json({ok:true,ai_configured:!!env.AI,database_ready:dbReady,session_secret_ready:sessionSecretReady,owner_email_configured:!!env.OWNER_EMAIL}); }
   if (path === "/api/register" && request.method === "POST") {
+    let stage = "membaca data";
+    try {
     let a; try {a=await request.json()} catch{return fail("JSON tidak valid")}
     const email=String(a.email||"").trim().toLowerCase(), password=String(a.password||"");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length<10 || password.length>200) return fail("Email tidak valid atau kata sandi harus 10–200 karakter.");
+    stage = "memeriksa kunci sesi";
     if (!(await getSessionSecret(env))) return fail("Server belum siap: database belum bisa membuat kunci sesi. Coba lagi nanti.",503);
+    stage = "memeriksa database akun";
     let dbReady; try { dbReady=!!env.DB; await env.DB.prepare("SELECT 1").first(); } catch { return fail("Database akun belum terhubung atau tabel belum dibuat. Periksa binding D1 dan jalankan migrasi.",503); }
+    stage = "membuat hash kata sandi";
     const salt=b64(crypto.getRandomValues(new Uint8Array(16))), hash=await digestPassword(password,salt), id=crypto.randomUUID();
     const role=env.OWNER_EMAIL && email===env.OWNER_EMAIL.toLowerCase() ? "admin" : "user";
+    stage = "menyimpan akun";
     try { await env.DB.prepare("INSERT INTO users(id,email,password_hash,salt,role,created_at) VALUES(?,?,?,?,?,?)").bind(id,email,hash,salt,role,new Date().toISOString()).run(); }
     catch { return fail("Email sudah terdaftar atau database belum siap.",409); }
+    stage = "membuat sesi login";
     return json({ok:true,email,role},200,{ "set-cookie": await sessionToken(id,env).then(t=>cookieHeader(t)) });
+    } catch (e) {
+      console.error("AI Asisten Yosep register failure at", stage, e && e.stack ? e.stack : String(e));
+      return fail("Pendaftaran gagal pada tahap: " + stage + ". Coba lagi. Jika berulang, tahap ini membantu pemeriksaan.", 500);
+    }
   }
   if (path === "/api/login" && request.method === "POST") {
     let a; try {a=await request.json()} catch{return fail("JSON tidak valid")}
