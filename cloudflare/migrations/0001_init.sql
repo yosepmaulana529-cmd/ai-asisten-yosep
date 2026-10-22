@@ -22,3 +22,8 @@ CREATE TABLE IF NOT EXISTS usage (
   PRIMARY KEY(user_id, day),
   FOREIGN KEY(user_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS app_config (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
